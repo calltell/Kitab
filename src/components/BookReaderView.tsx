@@ -28,6 +28,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { QuoteImageModal } from './QuoteImageModal';
+import { translations, formatDigits } from '../utils/i18n';
 import {
   BookFile,
   ReaderSettings,
@@ -75,6 +76,9 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
   onDeleteBook,
   onSaveBookmark,
 }) => {
+  const currentLang = readerSettings.appLanguage || 'fa';
+  const t = translations[currentLang] || translations.fa;
+
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [pages, setPages] = useState<BookPage[]>([]);
   const [selectedText, setSelectedText] = useState('');
@@ -257,16 +261,16 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
         : pages[currentPageIndex]?.content || '';
     if (textToCopy) {
       navigator.clipboard.writeText(textToCopy);
-      alert('متن کامل این صفحه با موفقیت کپی شد.');
+      alert(t.readerView.pageCopiedAlert);
     } else {
-      alert('متنی برای کپی وجود ندارد.');
+      alert(t.readerView.noTextToCopyAlert);
     }
   };
 
   const handleCopyText = () => {
     if (selectedText) {
       navigator.clipboard.writeText(selectedText);
-      alert('متن انتخاب شده کپی شد.');
+      alert(t.readerView.selectedTextCopiedAlert);
       setPopupPos(null);
     }
   };
@@ -289,7 +293,7 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
     setShowNoteModal(false);
     setNoteInput('');
     setPopupPos(null);
-    alert('نشان‌گذاری با موفقیت ذخیره شد.');
+    alert(t.readerView.bookmarkSavedAlert);
   };
 
   const currentPage = pages[currentPageIndex] || { content: '' };
@@ -429,7 +433,7 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
             className="p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors flex items-center gap-1.5 font-bold text-xs shrink-0"
           >
             <ArrowRight className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-            <span className="hidden sm:inline">بازگشت</span>
+            <span className="hidden sm:inline">{t.readerView.back}</span>
           </button>
 
           <div className="h-4 w-[1px] bg-black/10 dark:bg-white/10 shrink-0" />
@@ -440,7 +444,7 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
               {book.name}
             </h2>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0 hidden md:inline">
-              {book.category || 'بدون دسته‌بندی'}
+              {book.category || t.readerView.uncategorized}
             </span>
           </div>
         </div>
@@ -455,13 +459,13 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
                 ? 'bg-amber-500 text-slate-950 shadow-xs'
                 : 'bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20'
             }`}
-            title="جستجو در متن این فایل"
+            title={t.readerView.inBookSearchTitle}
           >
             <Search className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">جستجو در متن</span>
+            <span className="hidden sm:inline">{t.readerView.inBookSearch}</span>
             {inBookMatches.length > 0 && (
               <span className="px-1.5 py-0.2 rounded-full bg-slate-950 text-amber-300 text-[10px] font-extrabold">
-                {inBookMatches.length.toLocaleString('fa-IR')}
+                {formatDigits(inBookMatches.length, currentLang)}
               </span>
             )}
           </button>
@@ -470,10 +474,10 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
           <button
             onClick={() => setShowToolsDrawer(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-white dark:bg-amber-500 dark:text-slate-950 hover:bg-slate-800 dark:hover:bg-amber-400 font-bold text-xs shadow-xs transition-all"
-            title="تنظیمات مطالعه و ابزارها"
+            title={t.readerView.settingsAndToolsTitle}
           >
             <SlidersHorizontal className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">تنظیمات و ابزارها</span>
+            <span className="hidden md:inline">{t.readerView.settingsAndTools}</span>
           </button>
         </div>
       </header>
@@ -493,7 +497,7 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
                     setInBookQuery(e.target.value);
                     setActiveMatchIndex(0);
                   }}
-                  placeholder="جستجوی کلمه یا عبارت در این کتاب..."
+                  placeholder={t.readerView.searchPlaceholder}
                   className="w-full pr-9 pl-8 py-1.5 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-amber-500"
                   autoFocus
                 />
@@ -518,10 +522,10 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
                     ? 'bg-amber-500/10 border-amber-500 text-amber-600 dark:text-amber-400'
                     : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'
                 }`}
-                title="فیلترهای جستجو"
+                title={t.readerView.filters}
               >
                 <Filter className="w-3.5 h-3.5" />
-                <span className="hidden xs:inline">فیلترها</span>
+                <span className="hidden xs:inline">{t.readerView.filters}</span>
               </button>
 
               <button
@@ -547,7 +551,7 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
                     }
                     className="accent-amber-500 rounded"
                   />
-                  <span>تطابق دقیق کلمه</span>
+                  <span>{t.readerView.exactWord}</span>
                 </label>
 
                 <label className="flex items-center gap-1.5 cursor-pointer font-medium text-slate-700 dark:text-slate-300">
@@ -562,7 +566,7 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
                     }
                     className="accent-amber-500 rounded"
                   />
-                  <span>نادیده گرفتن اعراب</span>
+                  <span>{t.readerView.ignoreTashkeel}</span>
                 </label>
 
                 <label className="flex items-center gap-1.5 cursor-pointer font-medium text-slate-700 dark:text-slate-300">
@@ -577,7 +581,7 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
                     }
                     className="accent-amber-500 rounded"
                   />
-                  <span>پیشوندهای عربی (و، ف، ال...)</span>
+                  <span>{t.readerView.arabicPrefixes}</span>
                 </label>
 
                 <label className="flex items-center gap-1.5 cursor-pointer font-medium text-slate-700 dark:text-slate-300">
@@ -592,7 +596,7 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
                     }
                     className="accent-amber-500 rounded"
                   />
-                  <span>پسوندهای عربی (ها، هم...)</span>
+                  <span>{t.readerView.arabicSuffixes}</span>
                 </label>
               </div>
             )}
@@ -602,9 +606,9 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
               <div className="flex flex-col gap-2 pt-1 border-t border-slate-100 dark:border-slate-800">
                 <div className="flex items-center justify-between text-xs font-bold text-slate-600 dark:text-slate-400">
                   <span>
-                    تعداد کل یافته‌ها در این کتاب:{' '}
+                    {t.readerView.totalMatches}{' '}
                     <strong className="text-amber-600 dark:text-amber-400">
-                      {inBookMatches.length.toLocaleString('fa-IR')}
+                      {formatDigits(inBookMatches.length, currentLang)}
                     </strong>
                   </span>
 
@@ -622,11 +626,11 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
                         }}
                         className="px-2 py-0.5 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 disabled:opacity-40"
                       >
-                        قبلی
+                        {t.readerView.prev}
                       </button>
                       <span>
-                        {(activeMatchIndex + 1).toLocaleString('fa-IR')} از{' '}
-                        {inBookMatches.length.toLocaleString('fa-IR')}
+                        {formatDigits(activeMatchIndex + 1, currentLang)} {t.readerView.of}{' '}
+                        {formatDigits(inBookMatches.length, currentLang)}
                       </span>
                       <button
                         disabled={activeMatchIndex >= inBookMatches.length - 1}
@@ -640,7 +644,7 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
                         }}
                         className="px-2 py-0.5 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 disabled:opacity-40"
                       >
-                        بعدی
+                        {t.readerView.next}
                       </button>
                     </div>
                   )}
@@ -662,9 +666,9 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
                         }`}
                       >
                         <div className="flex items-center justify-between text-[11px] text-slate-400 mb-0.5">
-                          <span>مورد {(idx + 1).toLocaleString('fa-IR')}</span>
+                          <span>{t.readerView.match} {formatDigits(idx + 1, currentLang)}</span>
                           <span className="font-bold text-amber-600 dark:text-amber-400">
-                            صفحه {(m.pageIndex + 1).toLocaleString('fa-IR')}
+                            {t.readerView.page} {formatDigits(m.pageIndex + 1, currentLang)}
                           </span>
                         </div>
                         <p className="line-clamp-1 font-serif text-slate-700 dark:text-slate-300">
@@ -674,7 +678,7 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
                     ))}
                     {inBookMatches.length > 30 && (
                       <div className="text-center text-[11px] text-slate-400 py-1">
-                        و {inBookMatches.length - 30} مورد دیگر...
+                        {t.readerView.moreMatches.replace('#', formatDigits(inBookMatches.length - 30, currentLang))}
                       </div>
                     )}
                   </div>
@@ -696,11 +700,11 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
             className="flex items-center gap-0.5 sm:gap-1 px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 shadow-2xs border border-slate-200/80 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 shrink-0 whitespace-nowrap active:scale-95 transition-all text-slate-800 dark:text-slate-100 text-[11px] sm:text-xs cursor-pointer"
           >
             <ChevronRight className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-            <span className="whitespace-nowrap">صفحه قبل</span>
+            <span className="whitespace-nowrap">{t.readerView.prevPage}</span>
           </button>
 
           <div className="flex items-center gap-1 shrink-0 whitespace-nowrap bg-white/90 dark:bg-slate-800/90 px-2 sm:px-2.5 py-1 rounded-xl border border-slate-200/80 dark:border-slate-700 shadow-2xs text-[11px] sm:text-xs font-bold">
-            <span className="text-slate-500 dark:text-slate-400">صفحه</span>
+            <span className="text-slate-500 dark:text-slate-400">{t.readerView.page}</span>
             <select
               value={currentPageIndex}
               onChange={(e) => setCurrentPageIndex(Number(e.target.value))}
@@ -712,12 +716,12 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
                   value={idx}
                   className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-bold"
                 >
-                  {(idx + 1).toLocaleString('fa-IR')}
+                  {formatDigits(idx + 1, currentLang)}
                 </option>
               ))}
             </select>
             <span className="text-slate-500 dark:text-slate-400">
-              از {pages.length.toLocaleString('fa-IR')}
+              {t.readerView.of} {formatDigits(pages.length, currentLang)}
             </span>
           </div>
 
@@ -730,7 +734,7 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
             disabled={currentPageIndex === pages.length - 1}
             className="flex items-center gap-0.5 sm:gap-1 px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 shadow-2xs border border-slate-200/80 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 shrink-0 whitespace-nowrap active:scale-95 transition-all text-slate-800 dark:text-slate-100 text-[11px] sm:text-xs cursor-pointer"
           >
-            <span className="whitespace-nowrap">صفحه بعد</span>
+            <span className="whitespace-nowrap">{t.readerView.nextPage}</span>
             <ChevronLeft className="w-3.5 h-3.5 text-amber-500 shrink-0" />
           </button>
         </div>
@@ -766,7 +770,7 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="w-5 h-5 text-amber-500" />
-                <h3 className="font-extrabold text-sm">تنظیمات و امکانات فایل</h3>
+                <h3 className="font-extrabold text-sm">{t.readerView.readerSettingsTitle}</h3>
               </div>
               <button
                 onClick={() => setShowToolsDrawer(false)}
@@ -781,10 +785,10 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
               <button
                 onClick={handleCopyFullPageText}
                 className="flex-1 flex items-center justify-center gap-2 px-3.5 py-2.5 bg-amber-500 hover:bg-amber-600 active:scale-98 text-slate-950 rounded-xl font-bold text-xs transition-all shadow-xs cursor-pointer"
-                title="کپی کامل متن این صفحه به حافظه موقت"
+                title={t.readerView.copyWholePageTitle}
               >
                 <Copy className="w-4 h-4 text-slate-950" />
-                <span>کپی کل متن این صفحه</span>
+                <span>{t.readerView.copyWholePage}</span>
               </button>
             </div>
 
@@ -792,17 +796,17 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
             <div className="flex flex-col gap-2">
               <label className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                 <Palette className="w-4 h-4 text-amber-500" />
-                <span>پوسته و رنگ‌بندی مطالعه:</span>
+                <span>{t.readerView.themeLabel}</span>
               </label>
 
               <div className="grid grid-cols-5 gap-2">
                 {(
                   [
-                    { id: 'light', name: 'روشن', bg: 'bg-white', text: 'text-slate-900' },
-                    { id: 'cream', name: 'کرم', bg: 'bg-[#faf8f5]', text: 'text-slate-800' },
-                    { id: 'sepia', name: 'سپیا', bg: 'bg-[#fbf0d9]', text: 'text-[#5f4b32]' },
-                    { id: 'dark', name: 'تاریک', bg: 'bg-slate-900', text: 'text-slate-100' },
-                    { id: 'emerald', name: 'زمردی', bg: 'bg-[#062c24]', text: 'text-[#d1fae5]' },
+                    { id: 'light', name: t.readerView.themeLight, bg: 'bg-white', text: 'text-slate-900' },
+                    { id: 'cream', name: t.readerView.themeCream, bg: 'bg-[#faf8f5]', text: 'text-slate-800' },
+                    { id: 'sepia', name: t.readerView.themeSepia, bg: 'bg-[#fbf0d9]', text: 'text-[#5f4b32]' },
+                    { id: 'dark', name: t.readerView.themeDark, bg: 'bg-slate-900', text: 'text-slate-100' },
+                    { id: 'emerald', name: t.readerView.themeEmerald, bg: 'bg-[#062c24]', text: 'text-[#d1fae5]' },
                   ] as const
                 ).map((th) => (
                   <button
@@ -829,14 +833,14 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                   <Type className="w-4 h-4 text-amber-500" />
-                  <span>قلم و فونت متن:</span>
+                  <span>{t.readerView.fontLabel}</span>
                 </label>
                 <div className="flex flex-col gap-1.5">
                   {(
                     [
-                      { id: 'vazir', name: 'وزیر (مدرن و خوانا)', cls: 'font-vazir' },
-                      { id: 'amiri', name: 'امیری (نسخ کتب سنتی)', cls: 'font-amiri' },
-                      { id: 'scheherazade', name: 'شهرزاد (کلاسیک)', cls: 'font-scheherazade' },
+                      { id: 'vazir', name: t.readerView.fontVazir, cls: 'font-vazir' },
+                      { id: 'amiri', name: t.readerView.fontAmiri, cls: 'font-amiri' },
+                      { id: 'scheherazade', name: t.readerView.fontScheherazade, cls: 'font-scheherazade' },
                     ] as const
                   ).map((f) => (
                     <button
@@ -861,7 +865,7 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                   <Sliders className="w-4 h-4 text-amber-500" />
-                  <span>اندازه و فاصله قلم:</span>
+                  <span>{t.readerView.fontSizeAndSpacing}</span>
                 </label>
 
                 <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col gap-3">
@@ -878,7 +882,7 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
                     </button>
 
                     <span className="font-extrabold text-sm text-amber-600 dark:text-amber-400">
-                      {readerSettings.fontSize}px
+                      {formatDigits(readerSettings.fontSize, currentLang)}px
                     </span>
 
                     <button
@@ -911,7 +915,7 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
             <div className="flex flex-col gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
               <label className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                 <BookOpen className="w-4 h-4 text-amber-500" />
-                <span>حالت نمایش و صفحه‌بندی:</span>
+                <span>{t.readerView.displayMode}</span>
               </label>
 
               <div className="grid grid-cols-2 gap-2">
@@ -924,7 +928,7 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
                   }`}
                 >
                   <BookOpen className="w-4 h-4" />
-                  <span>نمایش صفحه‌ای (چند صفحه‌ای)</span>
+                  <span>{t.readerView.pageByPage}</span>
                 </button>
 
                 <button
@@ -936,13 +940,13 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
                   }`}
                 >
                   <FileText className="w-4 h-4" />
-                  <span>نمایش پیوسته (یکجا)</span>
+                  <span>{t.readerView.continuous}</span>
                 </button>
               </div>
 
               {readerSettings.mode === 'paginated' && (
                 <div className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/40 rounded-xl text-xs font-semibold border border-slate-200/80 dark:border-slate-700/80 mt-1">
-                  <span>تعداد کلمات هر صفحه:</span>
+                  <span>{t.readerView.wordsPerPage}</span>
                   <select
                     value={readerSettings.paginationWordCount}
                     onChange={(e) =>
@@ -952,11 +956,11 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
                     }
                     className="px-2 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold"
                   >
-                    <option value={200}>۲۰۰ کلمه</option>
-                    <option value={300}>۳۰۰ کلمه</option>
-                    <option value={400}>۴۰۰ کلمه (پیش‌فرض)</option>
-                    <option value={500}>۵۰۰ کلمه</option>
-                    <option value={700}>۷۰۰ کلمه</option>
+                    <option value={200}>{formatDigits(200, currentLang)} {t.readerView.wordsCount}</option>
+                    <option value={300}>{formatDigits(300, currentLang)} {t.readerView.wordsCount}</option>
+                    <option value={400}>{formatDigits(400, currentLang)} {t.readerView.wordsCount} ({t.readerView.defaultWords})</option>
+                    <option value={500}>{formatDigits(500, currentLang)} {t.readerView.wordsCount}</option>
+                    <option value={700}>{formatDigits(700, currentLang)} {t.readerView.wordsCount}</option>
                   </select>
                 </div>
               )}
@@ -965,12 +969,12 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
             {/* Section 4: Category & Actions */}
             <div className="flex flex-col gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
               <label className="text-xs font-bold text-slate-500 dark:text-slate-400">
-                دسته‌بندی و مدیریت فایل:
+                {t.readerView.fileManagement}
               </label>
 
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold">دسته‌بندی:</span>
+                  <span className="text-xs font-semibold">{t.readerView.category}</span>
                   <select
                     value={book.category}
                     onChange={(e) =>
@@ -1001,7 +1005,7 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
                       }`}
                     />
                     <span>
-                      {book.isFavorite ? 'در علاقه‌مندی‌ها' : 'افزودن به نشان‌ها'}
+                      {book.isFavorite ? t.readerView.inBookmarks : t.readerView.addToBookmarks}
                     </span>
                   </button>
 
@@ -1013,7 +1017,7 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-xs font-bold"
                   >
                     <Trash2 className="w-4 h-4" />
-                    <span>حذف فایل</span>
+                    <span>{t.readerView.deleteFile}</span>
                   </button>
                 </div>
               </div>
@@ -1035,10 +1039,10 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
           <button
             onClick={handleCopyText}
             className="flex items-center gap-1 px-2.5 py-1.5 hover:bg-slate-800 rounded-lg transition-colors shrink-0 cursor-pointer"
-            title="کپی متن انتخاب‌شده"
+            title={t.readerView.copyTextTitle}
           >
             <Copy className="w-3.5 h-3.5 text-slate-300" />
-            <span>کپی</span>
+            <span>{t.readerView.copy}</span>
           </button>
 
           <div className="w-px h-3.5 bg-slate-700 shrink-0" />
@@ -1046,10 +1050,10 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
           <button
             onClick={() => setShowNoteModal(true)}
             className="flex items-center gap-1 px-2.5 py-1.5 hover:bg-slate-800 text-amber-400 rounded-lg transition-colors shrink-0 cursor-pointer font-semibold"
-            title="علامت‌گذاری و یادداشت"
+            title={t.readerView.highlightAndNoteTitle}
           >
             <Highlighter className="w-3.5 h-3.5" />
-            <span>علامت‌گذاری</span>
+            <span>{t.readerView.highlight}</span>
           </button>
 
           <div className="w-px h-3.5 bg-slate-700 shrink-0" />
@@ -1057,10 +1061,10 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
           <button
             onClick={() => setShowQuoteModal(true)}
             className="flex items-center gap-1 px-2.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-lg shadow-xs transition-colors shrink-0 cursor-pointer"
-            title="ساخت عکس‌نوشته"
+            title={t.readerView.quoteImageTitle}
           >
             <ImageIcon className="w-3.5 h-3.5" />
-            <span>عکس‌نوشته</span>
+            <span>{t.readerView.quoteImage}</span>
           </button>
         </div>
       )}
@@ -1071,7 +1075,7 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md p-5 shadow-2xl flex flex-col gap-4 text-slate-900 dark:text-slate-100">
             <h3 className="font-bold text-sm flex items-center gap-2 text-amber-600">
               <Highlighter className="w-4 h-4" />
-              <span>افزودن نشان‌گذاری و یادداشت شخص</span>
+              <span>{t.readerView.addNoteTitle}</span>
             </h3>
 
             <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl text-xs font-serif italic text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60 line-clamp-3">
@@ -1081,7 +1085,7 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
             {/* Color Tag Selection */}
             <div>
               <label className="text-xs font-bold text-slate-500 mb-1.5 block">
-                رنگ‌های نشان‌گذاری:
+                {t.readerView.highlightColors}
               </label>
               <div className="flex items-center gap-2">
                 {(['yellow', 'green', 'blue', 'pink'] as const).map((clr) => (
@@ -1113,12 +1117,12 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
             {/* Note Input */}
             <div>
               <label className="text-xs font-bold text-slate-500 mb-1 block">
-                یادداشت یا حاشیه‌نویسی شما:
+                {t.readerView.yourNoteLabel}
               </label>
               <textarea
                 value={noteInput}
                 onChange={(e) => setNoteInput(e.target.value)}
-                placeholder="توضیح یا یادداشت علمی برای این فراز بنویسید..."
+                placeholder={t.readerView.notePlaceholder}
                 className="w-full h-24 p-2.5 text-xs rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none"
               />
             </div>
@@ -1128,13 +1132,13 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
                 onClick={() => setShowNoteModal(false)}
                 className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
-                انصراف
+                {t.readerView.cancel}
               </button>
               <button
                 onClick={handleSaveHighlight}
                 className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs"
               >
-                ذخیره نشان
+                {t.readerView.saveHighlight}
               </button>
             </div>
           </div>
@@ -1157,10 +1161,10 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
               <Trash2 className="w-6 h-6" />
             </div>
             <h3 className="font-bold text-base text-slate-900 dark:text-slate-100 mb-2">
-              تأیید حذف کتاب
+              {t.readerView.deleteBookConfirmTitle}
             </h3>
             <p className="text-xs text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
-              آیا از حذف کتاب «<span className="font-bold text-slate-900 dark:text-white">{book.name}</span>» اطمینان دارید؟
+              {t.readerView.deleteBookConfirmDesc.replace('{title}', book.name)}
             </p>
             <div className="flex items-center gap-3">
               <button
@@ -1170,13 +1174,13 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
                 }}
                 className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md transition-all active:scale-95 cursor-pointer"
               >
-                حذف کتاب
+                {t.readerView.deleteBookBtn}
               </button>
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 className="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition-all cursor-pointer"
               >
-                انصراف
+                {t.readerView.cancel}
               </button>
             </div>
           </div>

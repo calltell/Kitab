@@ -444,7 +444,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                         </span>
                       ) : (
                         <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${scheme.badgeColor}`}>
-                          انتخاب
+                          {t.settings.selectBtn}
                         </span>
                       )}
                     </div>
@@ -652,10 +652,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                         type="button"
                         onClick={() => setPendingDeleteSection('books')}
                         className="p-1 px-1.5 text-[10px] font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded flex items-center gap-0.5 cursor-pointer transition-colors"
-                        title="حذف فقط کتب"
+                        title={t.settings.deleteBooksTitle}
                       >
                         <Trash2 className="w-3 h-3" />
-                        <span>حذف</span>
+                        <span>{t.settings.delete}</span>
                       </button>
                     )}
                   </div>
@@ -675,15 +675,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                         type="button"
                         onClick={() => setPendingDeleteSection('bookmarks')}
                         className="p-1 px-1.5 text-[10px] font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded flex items-center gap-0.5 cursor-pointer transition-colors"
-                        title="حذف فقط نشان‌ها"
+                        title={t.settings.deleteBookmarksTitle}
                       >
                         <Trash2 className="w-3 h-3" />
-                        <span>حذف</span>
+                        <span>{t.settings.delete}</span>
                       </button>
                     )}
                   </div>
                   <span className="font-extrabold text-slate-800 dark:text-slate-200 text-xs">
-                    {formatDigits(storageStats.bookmarksCount, currentLang)} مورد
+                    {formatDigits(storageStats.bookmarksCount, currentLang)} {t.settings.itemsUnit}
                   </span>
                 </div>
 
@@ -698,15 +698,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                         type="button"
                         onClick={() => setPendingDeleteSection('history')}
                         className="p-1 px-1.5 text-[10px] font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded flex items-center gap-0.5 cursor-pointer transition-colors"
-                        title="حذف فقط تاریخچه"
+                        title={t.settings.deleteHistoryTitle}
                       >
                         <Trash2 className="w-3 h-3" />
-                        <span>حذف</span>
+                        <span>{t.settings.delete}</span>
                       </button>
                     )}
                   </div>
                   <span className="font-extrabold text-slate-800 dark:text-slate-200 text-xs">
-                    {formatDigits(storageStats.historyCount, currentLang)} ثبت
+                    {formatDigits(storageStats.historyCount, currentLang)} {t.settings.entriesUnit}
                   </span>
                 </div>
 
@@ -721,15 +721,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                         type="button"
                         onClick={() => setPendingDeleteSection('categories')}
                         className="p-1 px-1.5 text-[10px] font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded flex items-center gap-0.5 cursor-pointer transition-colors"
-                        title="بازنشانی دسته‌ها"
+                        title={t.settings.resetCategoriesTitle}
                       >
                         <Trash2 className="w-3 h-3" />
-                        <span>حذف</span>
+                        <span>{t.settings.delete}</span>
                       </button>
                     )}
                   </div>
                   <span className="font-extrabold text-slate-800 dark:text-slate-200 text-xs">
-                    {formatDigits(categories.length, currentLang)} دسته
+                    {formatDigits(categories.length, currentLang)} {t.settings.categoriesUnit}
                   </span>
                 </div>
               </div>
@@ -778,10 +778,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               <Trash2 className="w-6 h-6" />
             </div>
             <h3 className="font-bold text-base text-slate-900 dark:text-slate-100 mb-2">
-              تأیید حذف دسته‌بندی
+              {t.settings.deleteCatModalTitle}
             </h3>
             <p className="text-xs text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
-              آیا از حذف دسته‌بندی «<span className="font-bold text-slate-900 dark:text-white">{pendingDeleteCategory}</span>» اطمینان دارید؟ کتب این دسته به «بدون دسته‌بندی» منتقل خواهند شد.
+              {t.settings.deleteCatModalDescPrefix}
+              <span className="font-bold text-slate-900 dark:text-white">{pendingDeleteCategory}</span>
+              {t.settings.deleteCatModalDescSuffix}
             </p>
             <div className="flex items-center gap-3">
               <button
@@ -791,13 +793,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 }}
                 className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md transition-all active:scale-95 cursor-pointer"
               >
-                حذف دسته
+                {t.settings.deleteCatBtn}
               </button>
               <button
                 onClick={() => setPendingDeleteCategory(null)}
                 className="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition-all cursor-pointer"
               >
-                انصراف
+                {t.settings.cancelBtn}
               </button>
             </div>
           </div>
@@ -812,21 +814,21 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               <Database className="w-6 h-6" />
             </div>
             <h3 className="font-bold text-base text-slate-900 dark:text-slate-100 mb-2">
-              تأیید پاک‌سازی و آزادسازی حافظه
+              {t.settings.purgeModalTitle}
             </h3>
             <p className="text-xs text-slate-600 dark:text-slate-300 mb-4 leading-relaxed">
-              هیچ اطلاعاتی به صورت خودکار پاک نمی‌شود. می‌توانید موارد را به صورت تکی حذف نمایید، یا کل حافظه را یکجا پاکسازی کنید:
+              {t.settings.purgeModalDesc}
             </p>
 
             <div className="bg-slate-50 dark:bg-slate-800/80 rounded-xl p-3.5 border border-slate-200 dark:border-slate-700 mb-5 flex flex-col gap-2 text-xs">
               <div className="flex items-center justify-between py-1.5 border-b border-slate-200/60 dark:border-slate-700/60">
                 <span className="text-slate-600 dark:text-slate-300 flex items-center gap-1.5 font-medium">
                   <BookOpen className="w-3.5 h-3.5 text-amber-600" />
-                  کتب و متون بارگذاری‌شده:
+                  {t.settings.booksAndTextsLabel}
                 </span>
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-slate-900 dark:text-white">
-                    {formatDigits(books.length, currentLang)} کتاب ({formatDigits(storageStats.formattedSize, currentLang)})
+                    {formatDigits(books.length, currentLang)} {t.settings.booksCount} ({formatDigits(storageStats.formattedSize, currentLang)})
                   </span>
                   {books.length > 0 && (
                     <button
@@ -835,7 +837,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                       className="p-1 px-2 text-[11px] font-bold bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
                     >
                       <Trash2 className="w-3 h-3" />
-                      <span>حذف</span>
+                      <span>{t.settings.delete}</span>
                     </button>
                   )}
                 </div>
@@ -844,11 +846,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               <div className="flex items-center justify-between py-1.5 border-b border-slate-200/60 dark:border-slate-700/60">
                 <span className="text-slate-600 dark:text-slate-300 flex items-center gap-1.5 font-medium">
                   <Bookmark className="w-3.5 h-3.5 text-amber-600" />
-                  نشان‌ها و یادداشت‌های ثبت‌شده:
+                  {t.settings.bookmarksAndNotesLabel}
                 </span>
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-slate-900 dark:text-white">
-                    {formatDigits(storageStats.bookmarksCount, currentLang)} مورد
+                    {formatDigits(storageStats.bookmarksCount, currentLang)} {t.settings.itemsUnit}
                   </span>
                   {storageStats.bookmarksCount > 0 && (
                     <button
@@ -857,7 +859,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                       className="p-1 px-2 text-[11px] font-bold bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
                     >
                       <Trash2 className="w-3 h-3" />
-                      <span>حذف</span>
+                      <span>{t.settings.delete}</span>
                     </button>
                   )}
                 </div>
@@ -866,11 +868,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               <div className="flex items-center justify-between py-1.5 border-b border-slate-200/60 dark:border-slate-700/60">
                 <span className="text-slate-600 dark:text-slate-300 flex items-center gap-1.5 font-medium">
                   <History className="w-3.5 h-3.5 text-amber-600" />
-                  تاریخچه مطالعه و سرچ:
+                  {t.settings.historyLabel}
                 </span>
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-slate-900 dark:text-white">
-                    {formatDigits(storageStats.historyCount, currentLang)} ثبت
+                    {formatDigits(storageStats.historyCount, currentLang)} {t.settings.entriesUnit}
                   </span>
                   {storageStats.historyCount > 0 && (
                     <button
@@ -879,7 +881,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                       className="p-1 px-2 text-[11px] font-bold bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
                     >
                       <Trash2 className="w-3 h-3" />
-                      <span>حذف</span>
+                      <span>{t.settings.delete}</span>
                     </button>
                   )}
                 </div>
@@ -888,11 +890,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               <div className="flex items-center justify-between pt-1">
                 <span className="text-slate-600 dark:text-slate-300 flex items-center gap-1.5 font-medium">
                   <Folder className="w-3.5 h-3.5 text-amber-600" />
-                  دسته‌بندی‌های شخصی:
+                  {t.settings.categoriesLabel}
                 </span>
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-slate-900 dark:text-white">
-                    {formatDigits(categories.length, currentLang)} دسته
+                    {formatDigits(categories.length, currentLang)} {t.settings.categoriesUnit}
                   </span>
                   {categories.length > 0 && (
                     <button
@@ -901,7 +903,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                       className="p-1 px-2 text-[11px] font-bold bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
                     >
                       <Trash2 className="w-3 h-3" />
-                      <span>حذف</span>
+                      <span>{t.settings.delete}</span>
                     </button>
                   )}
                 </div>
@@ -913,13 +915,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 onClick={() => setPendingDeleteSection('all')}
                 className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md transition-all active:scale-95 cursor-pointer"
               >
-                تأیید و پاک‌سازی کامل حافظه
+                {t.settings.confirmFullPurgeBtn}
               </button>
               <button
                 onClick={() => setShowResetConfirm(false)}
                 className="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition-all cursor-pointer"
               >
-                انصراف
+                {t.settings.cancelBtn}
               </button>
             </div>
           </div>
@@ -935,24 +937,24 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             </div>
 
             <h3 className="font-bold text-base text-slate-900 dark:text-slate-100 mb-2">
-              {pendingDeleteSection === 'books' && 'تأیید حذف تمامی کتب'}
-              {pendingDeleteSection === 'bookmarks' && 'تأیید حذف تمامی نشان‌ها و یادداشت‌ها'}
-              {pendingDeleteSection === 'history' && 'تأیید حذف تاریخچه فعالیت‌ها'}
-              {pendingDeleteSection === 'categories' && 'تأیید بازنشانی دسته‌بندی‌ها'}
-              {pendingDeleteSection === 'all' && 'تأیید پاک‌سازی کامل حافظه'}
+              {pendingDeleteSection === 'books' && t.settings.confirmDeleteBooksTitle}
+              {pendingDeleteSection === 'bookmarks' && t.settings.confirmDeleteBookmarksTitle}
+              {pendingDeleteSection === 'history' && t.settings.confirmDeleteHistoryTitle}
+              {pendingDeleteSection === 'categories' && t.settings.confirmResetCategoriesTitle}
+              {pendingDeleteSection === 'all' && t.settings.confirmFullPurgeTitle}
             </h3>
 
             <p className="text-xs text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
               {pendingDeleteSection === 'books' &&
-                `آیا از پاک‌سازی تمامی متون و کتب بارگذاری‌شده (${formatDigits(books.length, currentLang)} کتاب) اطمینان دارید؟`}
+                `${t.settings.confirmDeleteBooksDescPrefix}${formatDigits(books.length, currentLang)}${t.settings.confirmDeleteBooksDescSuffix}`}
               {pendingDeleteSection === 'bookmarks' &&
-                `آیا از پاک‌سازی تمامی نشان‌ها و یادداشت‌های ثبت‌شده (${formatDigits(storageStats.bookmarksCount, currentLang)} مورد) اطمینان دارید؟`}
+                `${t.settings.confirmDeleteBookmarksDescPrefix}${formatDigits(storageStats.bookmarksCount, currentLang)}${t.settings.confirmDeleteBookmarksDescSuffix}`}
               {pendingDeleteSection === 'history' &&
-                `آیا از پاک‌سازی تمامی سوابق مطالعه و جستجو (${formatDigits(storageStats.historyCount, currentLang)} ثبت) اطمینان دارید؟`}
+                `${t.settings.confirmDeleteHistoryDescPrefix}${formatDigits(storageStats.historyCount, currentLang)}${t.settings.confirmDeleteHistoryDescSuffix}`}
               {pendingDeleteSection === 'categories' &&
-                `آیا از حذف دسته‌بندی‌های شخصی و بازگشت به دسته‌بندی‌های پیش‌فرض اطمینان دارید؟`}
+                t.settings.confirmResetCategoriesDesc}
               {pendingDeleteSection === 'all' &&
-                'آیا از پاک‌سازی کامل تمام اطلاعات (کتب، نشان‌ها، تاریخچه و دسته‌بندی‌ها) از حافظه مرورگر اطمینان دارید؟ این عمل غیرقابل بازگشت است.'}
+                t.settings.confirmFullPurgeDesc}
             </p>
 
             <div className="flex items-center gap-3">
@@ -975,14 +977,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 }}
                 className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md transition-all active:scale-95 cursor-pointer"
               >
-                {pendingDeleteSection === 'all' ? 'تأیید و پاک‌سازی کامل' : 'بله، حذف شود'}
+                {pendingDeleteSection === 'all' ? t.settings.confirmFullPurgeActionBtn : t.settings.yesDeleteBtn}
               </button>
               <button
                 type="button"
                 onClick={() => setPendingDeleteSection(null)}
                 className="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition-all cursor-pointer"
               >
-                انصراف
+                {t.settings.cancelBtn}
               </button>
             </div>
           </div>
