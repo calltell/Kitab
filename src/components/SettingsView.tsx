@@ -16,7 +16,6 @@ import {
   History,
   Folder,
   Palette,
-  Sparkles,
 } from 'lucide-react';
 import { ReaderSettings, BookFile, AppLanguage, AppThemeScheme } from '../types';
 import { translations, formatDigits } from '../utils/i18n';

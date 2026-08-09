@@ -232,7 +232,10 @@ export async function updateBook(book: BookFile): Promise<void> {
   }
 }
 
-export async function deleteBook(id: number): Promise<BookFile[]> {
+export async function deleteBook(
+  id: number,
+  existingBooks?: BookFile[]
+): Promise<BookFile[]> {
   try {
     const db = await openDB();
     await new Promise<void>((resolve, reject) => {
@@ -245,25 +248,99 @@ export async function deleteBook(id: number): Promise<BookFile[]> {
   } catch (e) {
     console.error('Error deleting book from IndexedDB:', e);
   }
+
+  if (existingBooks) {
+    return existingBooks.filter((b) => b.id !== id);
+  }
   return await getBooks();
 }
 
-export async function deleteBooksBatch(ids: number[]): Promise<BookFile[]> {
+export async function deleteBooksBatch(
+  ids: number[],
+  onProgress?: (current: number, total: number) => void,
+  existingBooks?: BookFile[]
+): Promise<BookFile[]> {
+  if (!ids || ids.length === 0) {
+    return existingBooks ? existingBooks : await getBooks();
+  }
+
   try {
     const db = await openDB();
-    await new Promise<void>((resolve, reject) => {
-      const tx = db.transaction('books', 'readwrite');
-      const store = tx.objectStore('books');
-      for (const id of ids) {
-        store.delete(id);
+    const total = ids.length;
+    // Chunk size 150 gives optimal balance between IndexedDB write throughput
+    // and letting the browser render frame updates so UI never freezes.
+    const chunkSize = 150;
+
+    for (let i = 0; i < total; i += chunkSize) {
+      const chunk = ids.slice(i, i + chunkSize);
+      await new Promise<void>((resolve, reject) => {
+        const tx = db.transaction('books', 'readwrite');
+        const store = tx.objectStore('books');
+        for (const id of chunk) {
+          store.delete(id);
+        }
+        tx.oncomplete = () => resolve();
+        tx.onerror = (e) => reject(tx.error || e);
+        tx.onabort = (e) => reject(tx.error || e);
+      });
+
+      const currentDone = Math.min(i + chunkSize, total);
+      if (onProgress) {
+        onProgress(currentDone, total);
       }
-      tx.oncomplete = () => resolve();
-      tx.onerror = (e) => reject(tx.error || e);
-    });
+
+      // Yield event loop tick for UI frame rendering
+      if (total > chunkSize) {
+        await new Promise((r) => setTimeout(r, 0));
+      }
+    }
   } catch (e) {
     console.error('Error deleting batch from IndexedDB:', e);
   }
+
+  if (existingBooks) {
+    const idSet = new Set(ids);
+    return existingBooks.filter((b) => !idSet.has(b.id));
+  }
   return await getBooks();
+}
+
+export async function updateBooksBatch(
+  updatedBooks: BookFile[],
+  onProgress?: (current: number, total: number) => void
+): Promise<void> {
+  if (!updatedBooks || updatedBooks.length === 0) return;
+
+  try {
+    const db = await openDB();
+    const total = updatedBooks.length;
+    const chunkSize = 150;
+
+    for (let i = 0; i < total; i += chunkSize) {
+      const chunk = updatedBooks.slice(i, i + chunkSize);
+      await new Promise<void>((resolve, reject) => {
+        const tx = db.transaction('books', 'readwrite');
+        const store = tx.objectStore('books');
+        for (const book of chunk) {
+          store.put(book);
+        }
+        tx.oncomplete = () => resolve();
+        tx.onerror = (e) => reject(tx.error || e);
+        tx.onabort = (e) => reject(tx.error || e);
+      });
+
+      const currentDone = Math.min(i + chunkSize, total);
+      if (onProgress) {
+        onProgress(currentDone, total);
+      }
+
+      if (total > chunkSize) {
+        await new Promise((r) => setTimeout(r, 0));
+      }
+    }
+  } catch (e) {
+    console.error('Error updating batch in IndexedDB:', e);
+  }
 }
 
 export async function clearAllBooks(): Promise<BookFile[]> {

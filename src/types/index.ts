@@ -122,26 +122,6 @@ export interface HistoryItem {
   pageIndex?: number;
 }
 
-export interface AIWordAnalysis {
-  word: string;
-  root: string;
-  vazn: string;
-  type: string;
-  meaning: string;
-  sarf: string;
-  nahv: string;
-  synonyms: string[];
-  examples: string[];
-}
-
-export interface AITafsirResult {
-  translation: string;
-  tafsir: string;
-  difficultWords: Array<{ word: string; meaning: string }>;
-  contextAndSource?: string;
-  keyLessons?: string[];
-}
-
 export interface OperationProgressState {
   isOpen: boolean;
   title: string;
@@ -151,6 +131,6 @@ export interface OperationProgressState {
   percentage: number;
   statusText?: string;
   details?: string;
-  type?: 'import' | 'export' | 'delete' | 'search' | 'ai';
+  type?: 'import' | 'export' | 'delete' | 'search';
 }
 

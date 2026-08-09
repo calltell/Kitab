@@ -1,8 +1,6 @@
 {
   "name": " 1 کتابخانه و پژوهشگاه متون اسلامی",
-  "description": "موتور جستجوی پیشرفته متون اسلامی و نسخ خطی با اعراب‌زدایی، پردازش ریشه، صفحه‌بندی هوشمند و هوش مصنوعی",
+  "description": "موتور جستجوی پیشرفته متون اسلامی و نسخ خطی با اعراب‌زدایی، پردازش ریشه، و صفحه‌بندی هوشمند",
   "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
+  "majorCapabilities": []
 }

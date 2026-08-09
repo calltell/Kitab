@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Search,
   Library,
-  Sparkles,
   Bookmark,
   History,
   Settings,
@@ -33,14 +32,28 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   appLanguage = 'fa',
 }) => {
   const t = translations[appLanguage] || translations.fa;
-  const [showLibraryTooltip, setShowLibraryTooltip] = useState(true);
+  const [showLibraryTooltip, setShowLibraryTooltip] = useState(() => {
+    try {
+      return localStorage.getItem('app_has_seen_library_tooltip') !== 'true';
+    } catch (e) {
+      return false;
+    }
+  });
+
+  const dismissTooltip = () => {
+    setShowLibraryTooltip(false);
+    try {
+      localStorage.setItem('app_has_seen_library_tooltip', 'true');
+    } catch (e) {}
+  };
 
   useEffect(() => {
+    if (!showLibraryTooltip) return;
     const timer = setTimeout(() => {
-      setShowLibraryTooltip(false);
+      dismissTooltip();
     }, 10000); // 10 seconds auto-dismiss
     return () => clearTimeout(timer);
-  }, []);
+  }, [showLibraryTooltip]);
 
   const tooltipText =
     appLanguage === 'ar'
@@ -76,7 +89,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                   onClick={(e) => {
                     e.stopPropagation();
                     onTabChange('library');
-                    setShowLibraryTooltip(false);
+                    dismissTooltip();
                   }}
                   className="absolute bottom-full mb-3 right-1/2 translate-x-1/2 z-50 animate-bounce-short cursor-pointer group"
                 >
@@ -89,7 +102,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setShowLibraryTooltip(false);
+                        dismissTooltip();
                       }}
                       className="w-5 h-5 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center text-white/90 transition-colors ml-1"
                       title="بستن"
@@ -111,7 +124,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               <button
                 type="button"
                 onClick={() => {
-                  if (tab.id === 'library') setShowLibraryTooltip(false);
+                  if (tab.id === 'library') dismissTooltip();
                   onTabChange(tab.id);
                 }}
                 className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-200 ${

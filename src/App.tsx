@@ -5,14 +5,13 @@ import {
   ReaderSettings,
   HighlightBookmark,
   HistoryItem,
-  AIWordAnalysis,
-  AITafsirResult,
   OperationProgressState,
 } from './types';
 import {
   getBooks,
   saveBooksBatch,
   updateBook,
+  updateBooksBatch,
   deleteBook,
   deleteBooksBatch,
   clearAllBooks,
@@ -35,13 +34,10 @@ import { BottomNav, TabType } from './components/BottomNav';
 import { SearchView } from './components/SearchView';
 import { LibraryView } from './components/LibraryView';
 import { BookReaderView } from './components/BookReaderView';
-import { AIAssistantView } from './components/AIAssistantView';
 import { BookmarksNotesView } from './components/BookmarksNotesView';
 import { HistoryView } from './components/HistoryView';
 import { SettingsView } from './components/SettingsView';
 import { SearchFilterModal } from './components/SearchFilterModal';
-import { AIWordModal } from './components/AIWordModal';
-import { AITafsirModal } from './components/AITafsirModal';
 import { ProgressModal } from './components/ProgressModal';
 
 
@@ -81,17 +77,6 @@ export default function App() {
 
   // Modals States
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-
-  // AI Modal States
-  const [isAiWordModalOpen, setIsAiWordModalOpen] = useState(false);
-  const [aiWordLoading, setAiWordLoading] = useState(false);
-  const [aiWordResult, setAiWordResult] = useState<AIWordAnalysis | null>(null);
-  const [aiWordTarget, setAiWordTarget] = useState('');
-
-  const [isAiTafsirModalOpen, setIsAiTafsirModalOpen] = useState(false);
-  const [aiTafsirLoading, setAiTafsirLoading] = useState(false);
-  const [aiTafsirResult, setAiTafsirResult] = useState<AITafsirResult | null>(null);
-  const [aiTafsirTarget, setAiTafsirTarget] = useState('');
 
   // Global Progress Overlay State
   const [progressState, setProgressState] = useState<OperationProgressState>({
@@ -275,7 +260,7 @@ export default function App() {
 
   // Delete Single Book
   const handleDeleteBook = async (bookId: number) => {
-    const updated = await deleteBook(bookId);
+    const updated = await deleteBook(bookId, books);
     setBooks(updated);
     if (currentBookId === bookId) {
       setActiveTab('search');
@@ -399,29 +384,52 @@ export default function App() {
   const handleBulkDelete = async (bookIds: number[]) => {
     if (bookIds.length === 0) return;
 
-    if (bookIds.length > 1) {
+    const total = bookIds.length;
+    const deleteSet = new Set(bookIds);
+
+    if (total > 1) {
       setProgressState({
         isOpen: true,
         title: 'درحال حذف گروهی کتاب‌ها',
-        subtitle: `${bookIds.length.toLocaleString('fa-IR')} کتاب در حال حذف`,
+        subtitle: `${total.toLocaleString('fa-IR')} کتاب در حال حذف`,
         currentStep: 0,
-        totalSteps: bookIds.length,
-        percentage: 30,
+        totalSteps: total,
+        percentage: 0,
         statusText: 'پاک‌سازی از بانک داده...',
         type: 'delete',
       });
     }
 
-    const updated = await deleteBooksBatch(bookIds);
+    const updated = await deleteBooksBatch(
+      bookIds,
+      (current, count) => {
+        if (total > 1) {
+          const pct = Math.round((current / count) * 95);
+          setProgressState((p) => ({
+            ...p,
+            currentStep: current,
+            percentage: pct,
+            statusText: `حذف ${current.toLocaleString('fa-IR')} از ${count.toLocaleString('fa-IR')} کتاب...`,
+          }));
+        }
+      },
+      books
+    );
+
     setBooks(updated);
 
-    if (bookIds.length > 1) {
+    if (currentBookId !== null && deleteSet.has(currentBookId)) {
+      setCurrentBookId(null);
+      setActiveTab('search');
+    }
+
+    if (total > 1) {
       setProgressState({
         isOpen: true,
         title: 'حذف گروهی با موفقیت انجام شد',
-        subtitle: `${bookIds.length.toLocaleString('fa-IR')} کتاب حذف شدند`,
-        currentStep: bookIds.length,
-        totalSteps: bookIds.length,
+        subtitle: `${total.toLocaleString('fa-IR')} کتاب حذف شدند`,
+        currentStep: total,
+        totalSteps: total,
         percentage: 100,
         statusText: 'پایان پاک‌سازی!',
         type: 'delete',
@@ -429,7 +437,7 @@ export default function App() {
 
       setTimeout(() => {
         setProgressState((p) => ({ ...p, isOpen: false }));
-      }, 800);
+      }, 600);
     }
   };
 
@@ -437,48 +445,47 @@ export default function App() {
   const handleBulkChangeCategory = async (bookIds: number[], newCategory: string) => {
     if (bookIds.length === 0) return;
 
-    if (bookIds.length > 1) {
+    const total = bookIds.length;
+    const idSet = new Set(bookIds);
+
+    if (total > 1) {
       setProgressState({
         isOpen: true,
         title: 'درحال تغییر دسته‌بندی گروهی',
         subtitle: `انتقال به «${newCategory}»`,
         currentStep: 0,
-        totalSteps: bookIds.length,
-        percentage: 10,
+        totalSteps: total,
+        percentage: 0,
         statusText: 'اعمال بر روی متون...',
         type: 'import',
       });
     }
 
-    for (let i = 0; i < bookIds.length; i++) {
-      const id = bookIds[i];
-      const b = books.find((x) => x.id === id);
-      if (b) {
-        const updated = { ...b, category: newCategory };
-        await updateBook(updated);
-      }
+    const booksToUpdate = books.filter((b) => idSet.has(b.id)).map((b) => ({ ...b, category: newCategory }));
 
-      if (bookIds.length > 1) {
-        const pct = Math.round(((i + 1) / bookIds.length) * 90);
+    await updateBooksBatch(booksToUpdate, (current, count) => {
+      if (total > 1) {
+        const pct = Math.round((current / count) * 90);
         setProgressState((p) => ({
           ...p,
-          currentStep: i + 1,
+          currentStep: current,
           percentage: pct,
-          statusText: `بروزرسانی ${i + 1} از ${bookIds.length}`,
+          statusText: `بروزرسانی ${current.toLocaleString('fa-IR')} از ${count.toLocaleString('fa-IR')} کتاب...`,
         }));
       }
-    }
+    });
 
-    const refreshed = await getBooks();
-    setBooks(refreshed);
+    setBooks((prev) =>
+      prev.map((b) => (idSet.has(b.id) ? { ...b, category: newCategory } : b))
+    );
 
-    if (bookIds.length > 1) {
+    if (total > 1) {
       setProgressState({
         isOpen: true,
         title: 'دسته‌بندی با موفقیت تغییر کرد',
-        subtitle: `${bookIds.length.toLocaleString('fa-IR')} کتاب بروزرسانی شدند`,
-        currentStep: bookIds.length,
-        totalSteps: bookIds.length,
+        subtitle: `${total.toLocaleString('fa-IR')} کتاب بروزرسانی شدند`,
+        currentStep: total,
+        totalSteps: total,
         percentage: 100,
         statusText: 'تکمیل بروزرسانی!',
         type: 'import',
@@ -500,18 +507,18 @@ export default function App() {
   };
 
   const handleDeleteCategory = async (catName: string) => {
-    for (const b of books) {
-      if (b.category === catName) {
-        await updateBook({ ...b, category: 'بدون دسته‌بندی' });
-      }
+    const affected = books.filter((b) => b.category === catName);
+    if (affected.length > 0) {
+      const updatedList = affected.map((b) => ({ ...b, category: 'بدون دسته‌بندی' }));
+      await updateBooksBatch(updatedList);
+      setBooks((prev) =>
+        prev.map((b) => (b.category === catName ? { ...b, category: 'بدون دسته‌بندی' } : b))
+      );
     }
 
     const updatedCats = categories.filter((c) => c !== catName);
     setCategoriesState(updatedCats);
     saveCategories(updatedCats);
-
-    const refreshed = await getBooks();
-    setBooks(refreshed);
   };
 
   // Bookmarks & Highlights
@@ -570,62 +577,6 @@ export default function App() {
       indexedDB.deleteDatabase('IslamicLibraryDB');
     } catch (e) {}
     window.location.reload();
-  };
-
-  // Trigger AI Word Analysis from Text Selection
-  const handleRequestWordAnalysis = async (word: string, context: string) => {
-    setAiWordTarget(word);
-    setAiWordResult(null);
-    setAiWordLoading(true);
-    setIsAiWordModalOpen(true);
-
-    try {
-      const res = await fetch('/api/ai/analyze-word', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ word, context }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setAiWordResult(data);
-      } else {
-        alert(data.error || 'خطا در تحلیل کلمه.');
-        setIsAiWordModalOpen(false);
-      }
-    } catch (e) {
-      alert('خطا در ارتباط با سرور.');
-      setIsAiWordModalOpen(false);
-    } finally {
-      setAiWordLoading(false);
-    }
-  };
-
-  // Trigger AI Tafsir from Text Selection
-  const handleRequestTafsir = async (text: string, bookName: string) => {
-    setAiTafsirTarget(text);
-    setAiTafsirResult(null);
-    setAiTafsirLoading(true);
-    setIsAiTafsirModalOpen(true);
-
-    try {
-      const res = await fetch('/api/ai/tafsir-explanation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, bookName }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setAiTafsirResult(data);
-      } else {
-        alert(data.error || 'خطا در تولید تفسیر.');
-        setIsAiTafsirModalOpen(false);
-      }
-    } catch (e) {
-      alert('خطا در ارتباط با سرور.');
-      setIsAiTafsirModalOpen(false);
-    } finally {
-      setAiTafsirLoading(false);
-    }
   };
 
   const currentBook = books.find((b) => b.id === currentBookId);
@@ -729,8 +680,6 @@ export default function App() {
             onToggleStar={handleToggleStar}
             onDeleteBook={handleDeleteBook}
             onSaveBookmark={handleSaveBookmark}
-            onRequestWordAnalysis={handleRequestWordAnalysis}
-            onRequestTafsir={handleRequestTafsir}
           />
         )}
       </main>
@@ -763,24 +712,6 @@ export default function App() {
         }
         categories={categories}
         appLanguage={readerSettings.appLanguage || 'fa'}
-      />
-
-      {/* AI Morphological Analysis Modal */}
-      <AIWordModal
-        isOpen={isAiWordModalOpen}
-        onClose={() => setIsAiWordModalOpen(false)}
-        result={aiWordResult}
-        loading={aiWordLoading}
-        word={aiWordTarget}
-      />
-
-      {/* AI Tafsir Modal */}
-      <AITafsirModal
-        isOpen={isAiTafsirModalOpen}
-        onClose={() => setIsAiTafsirModalOpen(false)}
-        result={aiTafsirResult}
-        loading={aiTafsirLoading}
-        selectedText={aiTafsirTarget}
       />
     </div>
   );

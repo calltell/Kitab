@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, Moon, Sun, Sparkles } from 'lucide-react';
+import { BookOpen, Moon, Sun } from 'lucide-react';
 import { AppLanguage } from '../types';
 import { translations, formatDigits } from '../utils/i18n';
 

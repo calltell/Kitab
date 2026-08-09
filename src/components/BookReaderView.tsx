@@ -8,7 +8,6 @@ import {
   VolumeX,
   Star,
   Trash2,
-  Sparkles,
   Highlighter,
   Copy,
   BookMarked,
@@ -54,8 +53,6 @@ interface BookReaderViewProps {
   onToggleStar: (bookId: number) => void;
   onDeleteBook: (bookId: number, name: string) => void;
   onSaveBookmark: (bookmark: HighlightBookmark) => void;
-  onRequestWordAnalysis: (word: string, context: string) => void;
-  onRequestTafsir: (text: string, bookName: string) => void;
 }
 
 interface InBookMatch {
@@ -77,8 +74,6 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
   onToggleStar,
   onDeleteBook,
   onSaveBookmark,
-  onRequestWordAnalysis,
-  onRequestTafsir,
 }) => {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [pages, setPages] = useState<BookPage[]>([]);
@@ -295,20 +290,6 @@ export const BookReaderView: React.FC<BookReaderViewProps> = ({
     setNoteInput('');
     setPopupPos(null);
     alert('نشان‌گذاری با موفقیت ذخیره شد.');
-  };
-
-  const handleAiWordAnalysis = () => {
-    if (selectedText) {
-      onRequestWordAnalysis(selectedText, selectionContext);
-      setPopupPos(null);
-    }
-  };
-
-  const handleAiTafsir = () => {
-    if (selectedText) {
-      onRequestTafsir(selectedText, book.name);
-      setPopupPos(null);
-    }
   };
 
   const currentPage = pages[currentPageIndex] || { content: '' };

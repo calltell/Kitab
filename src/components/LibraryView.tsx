@@ -8,7 +8,6 @@ import {
   Sliders,
   CheckSquare,
   Square,
-  Sparkles,
   Download,
   Search,
 } from 'lucide-react';
